@@ -10,7 +10,10 @@ const Upload = () => {
 
   useEffect(() => {
     if (fileId) {
-      window.location.href = "/output-selection";
+      // Add a slight delay to ensure the state is fully updated before navigating
+      setTimeout(() => {
+        window.location.href = "/output-selection";
+      }, 500); // 500ms delay to handle the transition
     }
   }, [fileId]);
 
