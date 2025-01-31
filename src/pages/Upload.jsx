@@ -1,50 +1,71 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { FileUp, Upload as UploadIcon, AlertCircle, CheckCircle, ArrowRight } from "lucide-react";
 
 const Upload = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [fileId, setFileId] = useState(null);
   const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      setFile(selectedFile);
+      setError(null);
+    } else {
+      setError("Please select a PDF file");
+    }
   };
 
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type === "application/pdf") {
+      setFile(droppedFile);
+      setError(null);
+    } else {
+      setError("Please drop a PDF file");
+    }
   };
 
   const uploadPDF = async () => {
     if (!file) {
-      alert("Please select a file first.");
+      setError("Please select a file first.");
       return;
     }
-  
+
     setUploading(true);
     setError(null);
-  
+
     try {
       const formData = new FormData();
       formData.append("file", file);
-  
+
       const response = await fetch("http://127.0.0.1:8000/api/upload/", {
         method: "POST",
-        body: formData, // Send as FormData
+        body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       console.log("File uploaded successfully:", data);
-  
       setFileId(data.id);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -53,24 +74,97 @@ const Upload = () => {
       setUploading(false);
     }
   };
-  
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold">Upload Research Paper</h1>
-      <input type="file" className="mt-4 p-2 border" onChange={handleFileChange} />
-      <button
-        onClick={uploadPDF}
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg"
-        disabled={uploading}
-      >
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
-      {error && <p className="mt-2 text-red-500">{error}</p>}
-      {fileId && <p className="mt-2 text-green-500">Upload successful! File ID: {fileId}</p>}
-      <Link to="/output-selection" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">
-        Next
-      </Link>
+    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 py-16 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Upload Your Research Paper
+          </h1>
+          <p className="text-lg text-gray-600">
+            Upload your PDF file to begin the conversion process
+          </p>
+        </div>
+
+        <div
+          className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            dragActive
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 hover:border-blue-400"
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <FileUp className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <label className="block mb-4">
+            <span className="text-gray-700">
+              Drag and drop your PDF here, or
+              <button
+                onClick={() => document.querySelector('input[type="file"]').click()}
+                className="text-blue-600 hover:text-blue-700 font-medium mx-1"
+              >
+                browse
+              </button>
+              to choose a file
+            </span>
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              accept="application/pdf"
+            />
+          </label>
+          {file && (
+            <div className="text-sm text-gray-600 bg-gray-100 p-2 rounded">
+              Selected: {file.name}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {error && (
+            <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded">
+              <AlertCircle className="w-5 h-5" />
+              {error}
+            </div>
+          )}
+
+          {fileId && (
+            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
+              <CheckCircle className="w-5 h-5" />
+              Upload successful! File ID: {fileId}
+            </div>
+          )}
+
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={uploadPDF}
+              disabled={uploading || !file}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white transition-colors ${
+                uploading || !file
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              <UploadIcon className="w-5 h-5" />
+              {uploading ? "Uploading..." : "Upload PDF"}
+            </button>
+
+            {fileId && (
+              <button
+                onClick={() => window.location.href = '/output-selection'}
+                className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                Continue
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
