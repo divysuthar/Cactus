@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { FileUp, Upload as UploadIcon, AlertCircle, CheckCircle, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FileUp, Upload as UploadIcon, AlertCircle, CheckCircle } from "lucide-react";
 
 const Upload = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [fileId, setFileId] = useState(null);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-
-  useEffect(() => {
-    if (fileId) {
-      // Add a slight delay to ensure the state is fully updated before navigating
-      setTimeout(() => {
-        window.location.href = "/output-selection";
-      }, 500); // 500ms delay to handle the transition
-    }
-  }, [fileId]);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -71,7 +63,9 @@ const Upload = () => {
 
       const data = await response.json();
       console.log("File uploaded successfully:", data);
-      setFileId(data.id);
+      
+      // Navigate to the next page with the file ID
+      navigate('/output-selection', { state: { fileId: data.id } });
     } catch (error) {
       console.error("Error uploading file:", error);
       setError(error.message);
@@ -134,13 +128,6 @@ const Upload = () => {
             <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded">
               <AlertCircle className="w-5 h-5" />
               {error}
-            </div>
-          )}
-
-          {fileId && (
-            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
-              <CheckCircle className="w-5 h-5" />
-              Upload successful! Redirecting...
             </div>
           )}
 
