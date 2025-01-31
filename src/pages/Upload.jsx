@@ -25,29 +25,27 @@ const Upload = () => {
       alert("Please select a file first.");
       return;
     }
-
+  
     setUploading(true);
     setError(null);
-
+  
     try {
-      const base64File = await convertToBase64(file);
-
-      const response = await fetch("https://679b818133d3168463241a20.mockapi.io/upload", {
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      const response = await fetch("http://127.0.0.1:8000/api/upload/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ file: base64File, fileName: file.name }),
+        body: formData, // Send as FormData
       });
-
+  
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
       console.log("File uploaded successfully:", data);
-
-      setFileId(data.id); // Using MockAPI's generated ID
+  
+      setFileId(data.id);
     } catch (error) {
       console.error("Error uploading file:", error);
       setError(error.message);
@@ -55,6 +53,7 @@ const Upload = () => {
       setUploading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

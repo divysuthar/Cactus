@@ -106,7 +106,6 @@ def FileUpload(request):
                         image_bytes = base_image["image"]  # Get the image in bytes
 
                         # Open the image using Pillow
-                        print(image_bytes)
                         image = Image.open(BytesIO(image_bytes))
                         image_content = f"Image {page_num + 1} - {image.format} ({image.size[0]}x{image.size[1]})"
                         images.append(image_content)  # Save image info
@@ -122,6 +121,7 @@ def FileUpload(request):
             #     print("Extracted Images: ", images)
 
             # Return the content (text and images info)
+            print(file_content.split("\n") if file_content else None)
             return Response(
                 {
                     "message": "File uploaded successfully",
