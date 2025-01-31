@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileUp, Upload as UploadIcon, AlertCircle, CheckCircle, ArrowRight } from "lucide-react";
 
 const Upload = () => {
@@ -7,6 +7,12 @@ const Upload = () => {
   const [fileId, setFileId] = useState(null);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => {
+    if (fileId) {
+      window.location.href = "/output-selection";
+    }
+  }, [fileId]);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -21,11 +27,7 @@ const Upload = () => {
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    setDragActive(e.type === "dragenter" || e.type === "dragover");
   };
 
   const handleDrop = (e) => {
@@ -135,7 +137,7 @@ const Upload = () => {
           {fileId && (
             <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
               <CheckCircle className="w-5 h-5" />
-              Upload successful! File ID: {fileId}
+              Upload successful! Redirecting...
             </div>
           )}
 
@@ -152,16 +154,6 @@ const Upload = () => {
               <UploadIcon className="w-5 h-5" />
               {uploading ? "Uploading..." : "Upload PDF"}
             </button>
-
-            {fileId && (
-              <button
-                onClick={() => window.location.href = '/output-selection'}
-                className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-              >
-                Continue
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            )}
           </div>
         </div>
       </div>
