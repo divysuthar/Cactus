@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.urls import path
-from .views import FileUpload
+from .views import summarize_document
 
 urlpatterns = [
-    path('upload/', FileUpload, name='file-upload'),
+    path('upload/', summarize_document, name='file-upload'),
+    # path('click/', TestAPI, name='check'),
 ]
