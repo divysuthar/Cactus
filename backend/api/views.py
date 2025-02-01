@@ -212,7 +212,7 @@ from .LLM.merge_making_video import create_video
 @api_view(["POST"])
 def research_paper_upload(request):
     """
-    API endpoint that accepts a PDF file upload, processes the research paper,
+    API endpoint that accepts a PDF file upload, proc   esses the research paper,
     and returns summaries and prompts.
     """
     if "file" not in request.FILES:
@@ -226,11 +226,12 @@ def research_paper_upload(request):
             {"error": "Invalid file type. Only PDF files are accepted."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
+    upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
     # Save the uploaded file to a designated folder (e.g., MEDIA_ROOT/uploads)
-    upload_path = os.path.join("uploads", pdf_file.name)
+    upload_path = os.path.join(upload_dir, pdf_file.name)
     file_path = default_storage.save(upload_path, pdf_file)
-    absolute_file_path = os.path.join(settings.MEDIA_ROOT, file_path)
+    absolute_file_path = default_storage.path(file_path)
 
     # Process the research paper
     summaries, prompts = process_research_paper_without_metrics(absolute_file_path)

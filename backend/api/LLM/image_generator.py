@@ -228,6 +228,7 @@ from pdfminer.high_level import extract_text
 from PIL import Image, ImageDraw, ImageFont
 import os
 import textwrap
+from ..views import summaries, prompts, filtered_prompts
 
 
 # Load SpaCy NLP model
@@ -384,11 +385,11 @@ def filter_short_prompts(prompts, min_length=5):
 
 
 # Example usage
-pdf_path = "research_paper2.pdf"  # Path to your research paper PDF
-summaries, prompts = process_research_paper_without_metrics(pdf_path)
+# pdf_path = ""  # Path to your research paper PDF
+# summaries, prompts = process_research_paper_without_metrics(pdf_path)
 
 # Example usage of the filtering function
-filtered_prompts = filter_short_prompts(prompts, min_length=5)
+# filtered_prompts = filter_short_prompts(prompts, min_length=5)
 
 # Display the summaries and extracted prompts for image/video content
 print("Abstract Summary:", summaries["abstract_summary"])
